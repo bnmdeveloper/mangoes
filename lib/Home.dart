@@ -6,7 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mangoes/login.dart';
 import 'package:mangoes/modals/Mangovariant.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -25,6 +27,7 @@ class _HomeState extends State<Home> {
   // Initial Selected Value
   String dropdownvalue = "Select Mango Variant";
   var listMango;
+  var listMangoId;
 
   // List of items in our dropdown menu
   List<String> items = ["Select Mango Variant"];
@@ -52,10 +55,13 @@ class _HomeState extends State<Home> {
           mangovariantFromJson(await response.stream.bytesToString());
       for (var i = 0; i < mangovariant.body.length; i++) {
         listMango = (mangovariant.body[i].mangoName);
+        listMangoId = (mangovariant.body[i].id);
         items.add(listMango);
       }
 
-      print(items);
+      print(listMango + listMangoId);
+
+      // print(items);
     } else {
       print(response.reasonPhrase);
     }
@@ -144,7 +150,27 @@ class _HomeState extends State<Home> {
 // function insert mango db
 
     return Scaffold(
-      appBar: AppBar(title: Text("Fruit Castle")),
+      appBar: AppBar(
+        title: Text("Fruit Castle"),
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+
+              prefs.remove("name");
+              prefs.remove("id");
+              prefs.remove("mobile");
+
+              Navigator.of(context, rootNavigator: true).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Login()));
+            },
+            child: Container(
+              padding: EdgeInsets.all(8),
+              child: Icon(Icons.logout),
+            ),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -201,7 +227,16 @@ class _HomeState extends State<Home> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: DropdownButton(
+              child: DropdownButtonFormField(
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  filled: true,
+                ),
                 // Initial Value
                 value: dropdownvalue,
 
@@ -222,6 +257,8 @@ class _HomeState extends State<Home> {
                   // mangoDbInsert();
                   setState(() {
                     dropdownvalue = newValue!;
+                    var indexValue = items.indexOf(newValue);
+                    print(indexValue);
                   });
                 },
               ),

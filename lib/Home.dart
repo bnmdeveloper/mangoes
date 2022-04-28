@@ -19,18 +19,26 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   // variables
-  var coordinatesController = new TextEditingController();
+
   var nameController = new TextEditingController();
   var numberController = new TextEditingController();
+
+  var addressController = new TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  var indexValue;
   dynamic assetsImage;
   // Initial Selected Value
-  String dropdownvalue = "Select Mango Variant";
+  String dropdownvalue = "Select Fruit Variant";
   var listMango;
   var listMangoId;
+  var latitude;
+  var longitude;
+  var base64string;
+
+  var prefs;
 
   // List of items in our dropdown menu
-  List<String> items = ["Select Mango Variant"];
+  List<String> items = ["Select Fruit Variant"];
 
   /*onCreate*/
   @override
@@ -40,7 +48,13 @@ class _HomeState extends State<Home> {
 
     mangoDbInsert(); //method
 
+    getprefs();
+
     print("hi");
+  }
+
+  Future<void> getprefs() async {
+    prefs = await SharedPreferences.getInstance();
   }
 
   Future<void> mangoDbInsert() async {
@@ -79,8 +93,7 @@ class _HomeState extends State<Home> {
       // String base64Image = base64Encode(photo);
       File imagefile = File(photo!.path); //convert Path to File
       Uint8List imagebytes = await imagefile.readAsBytes(); //convert to bytes
-      String base64string =
-          base64.encode(imagebytes); //convert bytes to base64 string
+      base64string = base64.encode(imagebytes); //convert bytes to base64 string
       print(base64string);
       setState(() {
         assetsImage = Image.file(File(photo.path));
@@ -130,11 +143,30 @@ class _HomeState extends State<Home> {
 
 // function 3 start
     Future<void> sendData() async {
+      // print(
+      //     "${nameController.text} ///// ${numberController.text}/// ${indexValue.toString()}/// ${latitude.toString()}///${longitude.toString()}////${base64string}////${addressController.text}12233");
       var headers = {'Content-Type': 'text/plain'};
       var request = http.Request(
           'POST', Uri.parse('http://mangoes.thefruitcastle.com/create.php'));
-      request.body =
-          '''       {\n            "name": "nikbik",\n            "mobile": "8106808666",\n            "mango_variant": "1",\n            "latitude": "17.25",\n            "longtitude": "86.45",\n            "img": "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=",\n            "address": "pedawaltair",\n            "created_time": "2022-04-19 14:54:51",\n            "updated_time": "2022-04-19 14:54:51",\n            "created_by": "2",\n            "updated_by": "1"\n        }''';
+      request.body = '''       {\n            "name": "''' +
+          nameController.text +
+          '''",\n            "mobile": "''' +
+          numberController.text +
+          '''",\n            "mango_variant": "''' +
+          indexValue.toString() +
+          '''",\n            "latitude": "''' +
+          latitude.toString() +
+          '''",\n            "longtitude": "''' +
+          longitude.toString() +
+          '''",\n            "img": "''' +
+          base64string +
+          '''",\n            "address": "''' +
+          addressController.text +
+          '''",\n            "created_by": "''' +
+          prefs.getString("id") +
+          '''",\n            "updated_by": "''' +
+          prefs.getString("id") +
+          '''"\n        }''';
       request.headers.addAll(headers);
 
       http.StreamedResponse response = await request.send();
@@ -155,8 +187,6 @@ class _HomeState extends State<Home> {
         actions: [
           GestureDetector(
             onTap: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-
               prefs.remove("name");
               prefs.remove("id");
               prefs.remove("mobile");
@@ -177,19 +207,15 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 10,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: coordinatesController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Location',
-                ),
-              ),
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: longitude == null
+                      ? Text("Please click Get coordinates button")
+                      : Text(longitude.toString() + "  " + latitude.toString()),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
                   child: ElevatedButton(
@@ -197,8 +223,13 @@ class _HomeState extends State<Home> {
                       var currentLocation = await _determinePosition();
                       Position position = await Geolocator.getCurrentPosition(
                           desiredAccuracy: LocationAccuracy.high);
-                      coordinatesController.text = position.toString();
+
                       // print(position.toString());
+
+                      setState(() {
+                        latitude = position.latitude;
+                        longitude = position.longitude;
+                      });
                     },
                     child: Text("Get Coordinates"),
                   ),
@@ -222,6 +253,18 @@ class _HomeState extends State<Home> {
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Phone Number',
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                controller: addressController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Address',
                 ),
               ),
             ),
@@ -257,7 +300,7 @@ class _HomeState extends State<Home> {
                   // mangoDbInsert();
                   setState(() {
                     dropdownvalue = newValue!;
-                    var indexValue = items.indexOf(newValue);
+                    indexValue = items.indexOf(newValue);
                     print(indexValue);
                   });
                 },
@@ -301,7 +344,7 @@ class _HomeState extends State<Home> {
               child: ElevatedButton(
                   onPressed: () {
                     print(items);
-                    // sendData();
+                    sendData();
                   },
                   child: Text("Submit")),
             ),
